@@ -1,43 +1,59 @@
 import { useMemo, useState } from "react";
-import { SPRITES, RARITIES, RELEASED_ENTRIES, VARIANTS, spriteImg } from "../data/sprites.js";
+import { ENTRIES, RARITIES, RELEASED_ENTRIES, VARIANTS } from "../data/sprites.js";
 
-const STATUS = ["All", "Owned", "Missing"];
+const STATUS = ["All", "Owned", "Missing", "Lost"];
 
-export default function Locker({ owned, mastered, toggle, resetAll }) {
+const STATE_LABEL = {
+  none: "Not owned",
+  owned: "Owned",
+  mastered: "★ Mastered",
+  lost: "Lost — buy back",
+};
+
+export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
   const [status, setStatus] = useState("All");
   const [rarity, setRarity] = useState(null);
   const [query, setQuery] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
-  const [expanded, setExpanded] = useState(null); // sprite id or null
+  const [detailId, setDetailId] = useState(null); // sprite id or null
+
+  function stateOf(entryId) {
+    if (lost.has(entryId)) return "lost";
+    if (mastered.has(entryId)) return "mastered";
+    if (owned.has(entryId)) return "owned";
+    return "none";
+  }
 
   const rarityTotals = useMemo(() => {
     const t = {};
-    for (const key of Object.keys(RARITIES)) t[key] = { have: 0, max: 0, total: 0 };
+    for (const key of Object.keys(RARITIES)) t[key] = { have: 0, max: 0, total: 0, lost: 0 };
     for (const e of RELEASED_ENTRIES) {
       t[e.sprite.rarity].total++;
       if (owned.has(e.id)) t[e.sprite.rarity].have++;
       if (mastered.has(e.id)) t[e.sprite.rarity].max++;
+      if (lost.has(e.id)) t[e.sprite.rarity].lost++;
     }
     return t;
-  }, [owned, mastered]);
+  }, [owned, mastered, lost]);
 
-  const visibleSprites = useMemo(() => {
+  const visibleEntries = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const list = SPRITES.filter((s) => {
-      if (rarity && s.rarity !== rarity) return false;
-      if (q && !s.name.toLowerCase().includes(q)) return false;
-      const released = s.variants.filter((v) => !v.u);
-      if (released.length === 0 && status !== "All") return false;
-      const haveCount = released.filter((v) => owned.has(`${s.id}:${v.v}`)).length;
-      if (status === "Owned") return haveCount > 0;
-      if (status === "Missing") return haveCount < released.length;
+    const list = ENTRIES.filter((e) => {
+      if (rarity && e.sprite.rarity !== rarity) return false;
+      if (q && !e.sprite.name.toLowerCase().includes(q) && !e.label.toLowerCase().includes(q)) {
+        return false;
+      }
+      if (!e.released) return status === "All";
+      if (status === "Owned") return owned.has(e.id);
+      if (status === "Missing") return !owned.has(e.id) && !lost.has(e.id);
+      if (status === "Lost") return lost.has(e.id);
       return true;
     });
-    // Fully-unreleased sprites sink to the end (display only — dataset order untouched).
-    return [...list].sort(
-      (a, b) => (a.variants.every((v) => v.u) ? 1 : 0) - (b.variants.every((v) => v.u) ? 1 : 0)
-    );
-  }, [status, rarity, query, owned]);
+    // Unreleased entries sink to the end (display only — dataset order untouched).
+    return [...list].sort((a, b) => (a.released ? 0 : 1) - (b.released ? 0 : 1));
+  }, [status, rarity, query, owned, lost]);
+
+  const detailSprite = detailId ? ENTRIES.find((e) => e.sprite.id === detailId)?.sprite : null;
 
   return (
     <div>
@@ -49,6 +65,9 @@ export default function Locker({ owned, mastered, toggle, resetAll }) {
               {rarityTotals[key].have}/{rarityTotals[key].total}
               {rarityTotals[key].max > 0 && (
                 <span className="nums-max"> ★{rarityTotals[key].max}</span>
+              )}
+              {rarityTotals[key].lost > 0 && (
+                <span className="nums-lost"> ⚠{rarityTotals[key].lost}</span>
               )}
             </div>
           </div>
@@ -67,7 +86,7 @@ export default function Locker({ owned, mastered, toggle, resetAll }) {
         {STATUS.map((s) => (
           <button
             key={s}
-            className={`chip ${status === s ? "on" : ""}`}
+            className={`chip ${status === s ? "on" : ""} ${s === "Lost" ? "chip-lost" : ""}`}
             onClick={() => setStatus(s)}
           >
             {s}
@@ -85,102 +104,91 @@ export default function Locker({ owned, mastered, toggle, resetAll }) {
       </div>
 
       <p className="hint" style={{ margin: "0 0 10px" }}>
-        Tap a variant to cycle: owned → ★ mastered → clear.
+        Tap the image for details. Tap the status to cycle: owned → ★ mastered → lost (buy back) → clear.
       </p>
 
-      {visibleSprites.length === 0 && (
+      {visibleEntries.length === 0 && (
         <div className="empty">No sprites match. Clear a filter to see more.</div>
       )}
 
-      {visibleSprites.map((s) => {
-        const released = s.variants.filter((v) => !v.u);
-        const haveCount = released.filter((v) => owned.has(`${s.id}:${v.v}`)).length;
-        const color = RARITIES[s.rarity].color;
-        const isOpen = expanded === s.id;
-        return (
-          <div className="sprite-card" key={s.id}>
-            <button
-              className="sprite-head"
-              onClick={() => setExpanded(isOpen ? null : s.id)}
-              aria-expanded={isOpen}
+      <div className="entry-grid">
+        {visibleEntries.map((e) => {
+          const soon = !e.released;
+          const state = soon ? "none" : stateOf(e.id);
+          const color = RARITIES[e.sprite.rarity].color;
+          return (
+            <div
+              className={`entry-card state-${state} ${soon ? "soon" : ""}`}
+              key={e.id}
+              style={{ "--glow": color }}
             >
-              <img
-                className="sprite-img"
-                src={spriteImg(s.id)}
-                alt=""
-                loading="lazy"
-                onError={(e) => { e.currentTarget.outerHTML = `<div class="sprite-emoji">${s.emoji}</div>`; }}
-              />
-              <div className="sprite-title">
-                <h3 className="name display">{s.name}</h3>
-                <div className="meta" title={s.ability}>{s.ability}</div>
-              </div>
-              <span className="rarity-pill" style={{ background: color }}>
-                {RARITIES[s.rarity].name}
-              </span>
-              <span className="sprite-count">
-                {haveCount}/{released.length || "—"}
-                {released.some((v) => mastered.has(`${s.id}:${v.v}`)) && (
-                  <span className="nums-max"> ★{released.filter((v) => mastered.has(`${s.id}:${v.v}`)).length}</span>
-                )}
-              </span>
-            </button>
-            {isOpen && (
-              <div className="sprite-detail">
-                <div className="detail-row">
-                  <span className="detail-label">Ability</span>
-                  <span>{s.ability}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Location</span>
-                  <span>{s.where}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Drop chances</span>
-                  <span className="detail-drops">
-                    {s.variants.map((v) => {
-                      const variant = VARIANTS.find((x) => x.id === v.v);
-                      return (
-                        <span className="drop-line" key={v.v}>
-                          <span>{variant.name}{v.u ? " (soon)" : ""}</span>
-                          <b>{v.d === "0%" ? "not in chests" : v.d}</b>
-                        </span>
-                      );
-                    })}
+              <button
+                className="entry-media"
+                onClick={() => setDetailId(e.sprite.id)}
+                aria-label={`${e.label} details`}
+              >
+                <img
+                  className="entry-img"
+                  src={e.img}
+                  alt=""
+                  loading="lazy"
+                  onError={(ev) => { ev.currentTarget.outerHTML = `<span class="entry-emoji">${e.sprite.emoji}</span>`; }}
+                />
+              </button>
+              <div className="entry-body">
+                <div className="entry-name" title={e.label}>{e.label}</div>
+                <div className="entry-meta">
+                  <span className="rarity-pill sm" style={{ background: color }}>
+                    {RARITIES[e.sprite.rarity].name}
                   </span>
+                  <span className="entry-drop">{soon ? "soon" : e.drop === "0%" ? "—" : e.drop}</span>
                 </div>
               </div>
-            )}
-            <div className="variant-row">
-              {[...s.variants].sort((a, b) => (a.u ? 1 : 0) - (b.u ? 1 : 0)).map((v) => {
-                const id = `${s.id}:${v.v}`;
-                const isMastered = mastered.has(id);
-                const isOwned = owned.has(id);
-                const soon = !!v.u;
-                return (
-                  <button
-                    key={id}
-                    className={`variant-chip ${isOwned ? "owned" : ""} ${isMastered ? "mastered" : ""} ${soon ? "soon" : ""}`}
-                    style={{ "--glow": color }}
-                    disabled={soon}
-                    onClick={() => toggle(id)}
-                    aria-label={`${v.v} ${s.name}${soon ? " (coming soon)" : isMastered ? " — mastered" : isOwned ? " — owned" : " — not owned"}. Tap to change.`}
-                  >
-                    <img
-                      className="v-img"
-                      src={spriteImg(s.id, v.v)}
-                      alt=""
-                      loading="lazy"
-                      onError={(e) => { e.currentTarget.outerHTML = `<span class="v-emoji">${s.emoji}</span>`; }}
-                    />
-                    <span className="v-name">{soon ? "Soon" : isMastered ? "★ MAX" : v.v}</span>
-                  </button>
-                );
-              })}
+              <button
+                className={`entry-status ${state}`}
+                disabled={soon}
+                onClick={() => toggle(e.id)}
+                aria-label={`${e.label} — ${soon ? "coming soon" : STATE_LABEL[state]}. Tap to change.`}
+              >
+                {soon ? "Soon" : STATE_LABEL[state]}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {detailSprite && (
+        <div className="modal-overlay" onClick={() => setDetailId(null)}>
+          <div className="modal" onClick={(ev) => ev.stopPropagation()}>
+            <button className="modal-close" onClick={() => setDetailId(null)} aria-label="Close">×</button>
+            <h3 className="display" style={{ marginTop: 0 }}>{detailSprite.name}</h3>
+            <div className="sprite-detail">
+              <div className="detail-row">
+                <span className="detail-label">Ability</span>
+                <span>{detailSprite.ability}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Location</span>
+                <span>{detailSprite.where}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Drop chances</span>
+                <span className="detail-drops">
+                  {detailSprite.variants.map((v) => {
+                    const variant = VARIANTS.find((x) => x.id === v.v);
+                    return (
+                      <span className="drop-line" key={v.v}>
+                        <span>{variant.name}{v.u ? " (soon)" : ""}</span>
+                        <b>{v.d === "0%" ? "not in chests" : v.d}</b>
+                      </span>
+                    );
+                  })}
+                </span>
+              </div>
             </div>
           </div>
-        );
-      })}
+        </div>
+      )}
 
       <div className="panel" style={{ marginTop: 16 }}>
         {!confirmReset ? (

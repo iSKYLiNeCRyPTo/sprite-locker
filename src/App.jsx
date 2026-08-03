@@ -21,13 +21,15 @@ export default function App() {
   const [tab, setTab] = useState("locker");
   const [owned, setOwnedState] = useState(new Set());
   const [mastered, setMasteredState] = useState(new Set());
+  const [lost, setLostState] = useState(new Set());
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
 
   useEffect(() => {
-    loadCollection().then(({ owned, mastered }) => {
+    loadCollection().then(({ owned, mastered, lost }) => {
       setOwnedState(owned);
       setMasteredState(mastered);
+      setLostState(lost);
     });
   }, []);
 
@@ -37,19 +39,21 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(""), 2600);
   }
 
-  // Tap cycle: none -> owned -> mastered -> none
+  // Tap cycle: none -> owned -> mastered -> lost (buy back) -> none
   function toggle(entryId) {
     const isOwned = owned.has(entryId);
     const isMastered = mastered.has(entryId);
+    const isLost = lost.has(entryId);
     let state;
-    if (!isOwned) state = "owned";
+    if (isLost) state = "none";
+    else if (!isOwned) state = "owned";
     else if (!isMastered) state = "mastered";
-    else state = "none";
+    else state = "lost";
 
     setOwnedState((prev) => {
       const next = new Set(prev);
-      if (state === "none") next.delete(entryId);
-      else next.add(entryId);
+      if (state === "owned" || state === "mastered") next.add(entryId);
+      else next.delete(entryId);
       return next;
     });
     setMasteredState((prev) => {
@@ -58,15 +62,27 @@ export default function App() {
       else next.delete(entryId);
       return next;
     });
+    setLostState((prev) => {
+      const next = new Set(prev);
+      if (state === "lost") next.add(entryId);
+      else next.delete(entryId);
+      return next;
+    });
     setEntry(entryId, state);
   }
 
-  // Scan/merge: adds as owned, never demotes an already-mastered entry.
+  // Scan/merge: adds as owned, never demotes an already-mastered entry, and
+  // clears "lost" on anything the scan now sees in-game (i.e. bought back).
   function addMany(entryIds) {
     const fresh = entryIds.filter((id) => !owned.has(id));
     setOwnedState((prev) => {
       const next = new Set(prev);
       for (const id of fresh) next.add(id);
+      return next;
+    });
+    setLostState((prev) => {
+      const next = new Set(prev);
+      for (const id of fresh) next.delete(id);
       return next;
     });
     setManyOwned(fresh);
@@ -89,6 +105,12 @@ export default function App() {
       for (const id of freshMastered) next.add(id);
       return next;
     });
+    setLostState((prev) => {
+      const next = new Set(prev);
+      for (const id of friendOwned) next.delete(id);
+      for (const id of friendMastered) next.delete(id);
+      return next;
+    });
     setManyOwned(freshOwned);
     setManyMastered(freshMastered);
   }
@@ -96,12 +118,14 @@ export default function App() {
   function resetAll() {
     setOwnedState(new Set());
     setMasteredState(new Set());
+    setLostState(new Set());
     clearCollection();
     showToast("Locker cleared");
   }
 
   const haveReleased = RELEASED_ENTRIES.filter((e) => owned.has(e.id)).length;
   const masteredReleased = RELEASED_ENTRIES.filter((e) => mastered.has(e.id)).length;
+  const lostReleased = RELEASED_ENTRIES.filter((e) => lost.has(e.id)).length;
   const total = RELEASED_ENTRIES.length;
   const pct = total ? Math.round((haveReleased / total) * 100) : 0;
 
@@ -114,7 +138,10 @@ export default function App() {
           </h1>
           <div className="completion">
             <div className="big">{haveReleased} / {total}</div>
-            <div className="sub">{pct}% extracted · ★ {masteredReleased} mastered</div>
+            <div className="sub">
+              {pct}% extracted · ★ {masteredReleased} mastered
+              {lostReleased > 0 && <span className="lost-flag"> · ⚠ {lostReleased} lost</span>}
+            </div>
           </div>
         </div>
         <div className="progress-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
@@ -123,7 +150,7 @@ export default function App() {
       </header>
 
       {tab === "locker" && (
-        <Locker owned={owned} mastered={mastered} toggle={toggle} resetAll={resetAll} />
+        <Locker owned={owned} mastered={mastered} lost={lost} toggle={toggle} resetAll={resetAll} />
       )}
       {tab === "scan" && <Scan owned={owned} addMany={addMany} showToast={showToast} />}
       {tab === "trade" && (
