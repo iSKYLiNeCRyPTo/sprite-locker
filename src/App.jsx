@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import Locker from "./components/Locker.jsx";
-import Scan from "./components/Scan.jsx";
 import Trade from "./components/Trade.jsx";
 import {
   loadCollection,
@@ -13,7 +12,6 @@ import { RELEASED_ENTRIES } from "./data/sprites.js";
 
 const TABS = [
   { id: "locker", label: "Locker" },
-  { id: "scan", label: "Scan" },
   { id: "trade", label: "Trade" },
 ];
 
@@ -74,24 +72,6 @@ export default function App() {
       return nextSet;
     });
     setEntry(entryId, lost.has(entryId) ? "lost" : "owned", next);
-  }
-
-  // Scan/merge: adds as owned, never demotes an already-mastered entry, and
-  // clears "lost" on anything the scan now sees in-game (i.e. bought back) —
-  // while preserving mastery earned before it was lost.
-  function addMany(entryIds) {
-    const fresh = entryIds.filter((id) => !owned.has(id));
-    setOwnedState((prev) => {
-      const next = new Set(prev);
-      for (const id of fresh) next.add(id);
-      return next;
-    });
-    setLostState((prev) => {
-      const next = new Set(prev);
-      for (const id of fresh) next.delete(id);
-      return next;
-    });
-    setManyOwned(fresh, mastered);
   }
 
   // Trade merge: brings over owned + mastered from a friend/old-device code.
@@ -165,7 +145,6 @@ export default function App() {
           resetAll={resetAll}
         />
       )}
-      {tab === "scan" && <Scan owned={owned} addMany={addMany} showToast={showToast} />}
       {tab === "trade" && (
         <Trade
           owned={owned}

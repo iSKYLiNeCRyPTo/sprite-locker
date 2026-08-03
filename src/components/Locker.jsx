@@ -191,6 +191,9 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
           >
             <button className="modal-close" onClick={() => setDetailId(null)} aria-label="Close">×</button>
             <div className="modal-hero">
+              {mastered.has(detailEntry.id) && (
+                <span className="modal-crown" aria-hidden="true">👑</span>
+              )}
               <img
                 className="modal-img"
                 src={detailEntry.img}
