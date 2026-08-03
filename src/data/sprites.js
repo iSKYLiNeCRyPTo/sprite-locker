@@ -25,6 +25,18 @@ export const RARITIES = {
   mythic: { name: "Mythic", color: "#f2c14e" },
 };
 
+// Interim buy-back (resummon) costs by rarity, from user-supplied numbers —
+// swap in the fortnite.gg/sprites values once confirmed. "normal" is the
+// Normal variant's cost; "special" covers every other variant (Gold, Gummy,
+// Galaxy, Gem, Holofoil, Cube, Quack). Shown in the Locker's detail modal.
+export const BUYBACK_CURRENCY = "Sprite Dust";
+export const BUYBACK = {
+  rare: { normal: 100, special: 2700 },
+  epic: { normal: 2700, special: 4000 },
+  legendary: { normal: 4500, special: 6750 },
+  mythic: { normal: 6750, special: 10000 },
+};
+
 // Images live in public/sprites/{spriteId}-{variantId}.webp (from fortnite.gg).
 // v: variant id, u: true if not yet released ("coming soon"),
 // d: Sprite Chest drop chance per fortnite.gg ("0%" = not currently in chests)

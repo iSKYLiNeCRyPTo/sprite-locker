@@ -39,26 +39,17 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(""), 2600);
   }
 
-  // Tap cycle: none -> owned -> mastered -> lost (buy back) -> none
+  // Ownership tap cycle: none -> owned, then owned <-> lost (buy back) from
+  // then on. Mastery is a separate, persistent flag (see toggleMastered) that
+  // this never touches — losing a mastered sprite and buying it back keeps
+  // it mastered. Use "Reset collection" to fully clear an entry to "none".
   function toggle(entryId) {
     const isOwned = owned.has(entryId);
-    const isMastered = mastered.has(entryId);
-    const isLost = lost.has(entryId);
-    let state;
-    if (isLost) state = "none";
-    else if (!isOwned) state = "owned";
-    else if (!isMastered) state = "mastered";
-    else state = "lost";
+    const state = isOwned ? "lost" : "owned";
 
     setOwnedState((prev) => {
       const next = new Set(prev);
-      if (state === "owned" || state === "mastered") next.add(entryId);
-      else next.delete(entryId);
-      return next;
-    });
-    setMasteredState((prev) => {
-      const next = new Set(prev);
-      if (state === "mastered") next.add(entryId);
+      if (state === "owned") next.add(entryId);
       else next.delete(entryId);
       return next;
     });
@@ -68,11 +59,26 @@ export default function App() {
       else next.delete(entryId);
       return next;
     });
-    setEntry(entryId, state);
+    setEntry(entryId, state, mastered.has(entryId));
+  }
+
+  // Separate control: mark/unmark mastered without touching owned/lost.
+  // Only meaningful once an entry has some history (owned or lost).
+  function toggleMastered(entryId) {
+    if (!owned.has(entryId) && !lost.has(entryId)) return;
+    const next = !mastered.has(entryId);
+    setMasteredState((prev) => {
+      const nextSet = new Set(prev);
+      if (next) nextSet.add(entryId);
+      else nextSet.delete(entryId);
+      return nextSet;
+    });
+    setEntry(entryId, lost.has(entryId) ? "lost" : "owned", next);
   }
 
   // Scan/merge: adds as owned, never demotes an already-mastered entry, and
-  // clears "lost" on anything the scan now sees in-game (i.e. bought back).
+  // clears "lost" on anything the scan now sees in-game (i.e. bought back) —
+  // while preserving mastery earned before it was lost.
   function addMany(entryIds) {
     const fresh = entryIds.filter((id) => !owned.has(id));
     setOwnedState((prev) => {
@@ -85,7 +91,7 @@ export default function App() {
       for (const id of fresh) next.delete(id);
       return next;
     });
-    setManyOwned(fresh);
+    setManyOwned(fresh, mastered);
   }
 
   // Trade merge: brings over owned + mastered from a friend/old-device code.
@@ -111,7 +117,7 @@ export default function App() {
       for (const id of friendMastered) next.delete(id);
       return next;
     });
-    setManyOwned(freshOwned);
+    setManyOwned(freshOwned, mastered);
     setManyMastered(freshMastered);
   }
 
@@ -150,7 +156,14 @@ export default function App() {
       </header>
 
       {tab === "locker" && (
-        <Locker owned={owned} mastered={mastered} lost={lost} toggle={toggle} resetAll={resetAll} />
+        <Locker
+          owned={owned}
+          mastered={mastered}
+          lost={lost}
+          toggle={toggle}
+          toggleMastered={toggleMastered}
+          resetAll={resetAll}
+        />
       )}
       {tab === "scan" && <Scan owned={owned} addMany={addMany} showToast={showToast} />}
       {tab === "trade" && (
