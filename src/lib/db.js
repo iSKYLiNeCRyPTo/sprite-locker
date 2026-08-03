@@ -1,5 +1,6 @@
 // IndexedDB persistence — same no-backend pattern as the other trackers.
-// Key = entryId. Value = { ts, m: true } when mastered (key presence = owned).
+// Key = entryId. Value = { ts, m: true } when mastered, { ts, l: true } when
+// lost (needs buy-back) — key presence alone means owned.
 const DB_NAME = "sprite-locker";
 const STORE = "collection";
 
@@ -25,21 +26,27 @@ export async function loadCollection() {
       const keysReq = store.getAllKeys();
       const valsReq = store.getAll();
       tx.oncomplete = () => {
-        const owned = new Set(keysReq.result);
+        const owned = new Set();
         const mastered = new Set();
+        const lost = new Set();
         keysReq.result.forEach((k, i) => {
-          if (valsReq.result[i] && valsReq.result[i].m) mastered.add(k);
+          const v = valsReq.result[i];
+          if (v && v.l) lost.add(k);
+          else {
+            owned.add(k);
+            if (v && v.m) mastered.add(k);
+          }
         });
-        resolve({ owned, mastered });
+        resolve({ owned, mastered, lost });
       };
       tx.onerror = () => reject(tx.error);
     });
   } catch {
-    return { owned: new Set(), mastered: new Set() };
+    return { owned: new Set(), mastered: new Set(), lost: new Set() };
   }
 }
 
-// state: "none" | "owned" | "mastered"
+// state: "none" | "owned" | "mastered" | "lost"
 export async function setEntry(entryId, state) {
   try {
     const db = await open();
@@ -48,6 +55,7 @@ export async function setEntry(entryId, state) {
       const store = tx.objectStore(STORE);
       if (state === "none") store.delete(entryId);
       else if (state === "mastered") store.put({ ts: Date.now(), m: true }, entryId);
+      else if (state === "lost") store.put({ ts: Date.now(), l: true }, entryId);
       else store.put({ ts: Date.now() }, entryId);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);

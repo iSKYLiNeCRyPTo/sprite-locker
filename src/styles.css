@@ -156,62 +156,60 @@ button { font-family: inherit; }
 .search::placeholder { color: var(--dim); }
 .search:focus { outline: 2px solid var(--rare); outline-offset: 1px; }
 
-/* ---------- sprite cards / lantern grid ---------- */
-.sprite-card {
+/* ---------- entry grid (3-up sprite cards) ---------- */
+.entry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.entry-card {
+  --glow: var(--rare);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 10px;
-}
-.sprite-head {
+  overflow: hidden;
   display: flex;
-  gap: 10px;
-  align-items: center;
+  flex-direction: column;
+}
+.entry-media {
+  display: block;
   width: 100%;
-  background: none;
+  aspect-ratio: 1;
   border: none;
   padding: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
   cursor: pointer;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--glow) 30%, transparent), var(--panel-2) 85%);
 }
-.sprite-head:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 8px; }
-.sprite-img {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
+.entry-media:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.entry-img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  flex-shrink: 0;
+  padding: 10px;
+  display: block;
 }
-.sprite-emoji {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
+.entry-emoji {
+  width: 100%;
+  height: 100%;
   display: grid;
   place-items: center;
-  font-size: 24px;
-  flex-shrink: 0;
+  font-size: 28px;
 }
-.sprite-title {
-  flex: 1;
-  min-width: 0;
-}
-.sprite-title .name {
-  font-size: 15px;
-  margin: 0;
-}
-.sprite-title .meta {
-  font-size: 11px;
-  color: var(--dim);
+.entry-body { padding: 6px 8px 4px; }
+.entry-name {
+  font-size: 12px;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.entry-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 4px;
 }
 .rarity-pill {
   font-size: 10px;
@@ -224,63 +222,83 @@ button { font-family: inherit; }
   color: var(--night);
   flex-shrink: 0;
 }
-.sprite-count { font-size: 12px; color: var(--dim); flex-shrink: 0; }
-
-.variant-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+.rarity-pill.sm { font-size: 8px; padding: 2px 6px; }
+.entry-drop {
+  font-size: 10px;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
-.variant-chip {
-  --glow: var(--rare);
-  width: 62px;
-  padding: 8px 0 6px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+.entry-status {
+  border: none;
+  border-top: 1px solid var(--line);
   background: var(--panel-2);
   color: var(--dim);
-  cursor: pointer;
-  text-align: center;
-  transition: box-shadow 0.2s ease, transform 0.1s ease;
-}
-.variant-chip .v-emoji {
-  font-size: 20px;
-  display: block;
-  filter: grayscale(1) brightness(0.45);
-}
-.variant-chip .v-img {
-  width: 36px;
-  height: 36px;
-  display: block;
-  margin: 0 auto;
-  object-fit: contain;
-  filter: grayscale(1) brightness(0.45);
-}
-.variant-chip .v-name {
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-top: 3px;
-  display: block;
+  letter-spacing: 0.02em;
+  padding: 8px 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 6px;
 }
-.variant-chip.owned {
-  border-color: var(--glow);
-  color: var(--ink);
-  box-shadow: 0 0 14px -2px var(--glow), inset 0 0 10px -6px var(--glow);
-}
-.variant-chip.owned .v-emoji { filter: none; }
-.variant-chip.owned .v-img { filter: none; }
+.entry-status:active:not(:disabled) { transform: scale(0.97); }
+.entry-status:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.entry-status:disabled { cursor: default; opacity: 0.7; }
+.entry-status.owned { color: var(--night); background: var(--glow); }
+.entry-card.state-owned { border-color: var(--glow); box-shadow: 0 0 10px -4px var(--glow); }
+.entry-status.mastered { color: var(--night); background: var(--mythic, #f2c14e); }
+.entry-card.state-mastered { border-color: var(--mythic, #f2c14e); box-shadow: 0 0 14px -3px var(--mythic, #f2c14e); }
+.entry-status.lost { color: #fff; background: var(--danger); }
+.entry-card.state-lost { border-color: var(--danger); box-shadow: 0 0 12px -4px var(--danger); }
+.entry-card.soon { opacity: 0.5; }
+.nums-max { color: var(--mythic, #f2c14e); font-weight: 700; }
+.nums-lost { color: var(--danger); font-weight: 700; }
+.chip-lost.on { background: var(--danger); border-color: var(--danger); color: #fff; }
+.lost-flag { color: var(--danger); }
 
-/* expanded detail view */
+/* ---------- sprite detail modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 20, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 50;
+  padding: 14px;
+}
+.modal {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
 .sprite-detail {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
   display: grid;
-  gap: 8px;
-  font-size: 12px;
+  gap: 10px;
+  font-size: 13px;
 }
 .detail-row { display: grid; gap: 2px; }
 .detail-label {
@@ -297,19 +315,6 @@ button { font-family: inherit; }
   gap: 12px;
 }
 .drop-line b { font-variant-numeric: tabular-nums; }
-.variant-chip.mastered {
-  border-color: var(--mythic, #f2c14e);
-  box-shadow: 0 0 18px -2px var(--glow), inset 0 0 12px -4px var(--glow);
-}
-.variant-chip.mastered .v-name { color: var(--mythic, #f2c14e); }
-.nums-max { color: var(--mythic, #f2c14e); font-weight: 700; }
-.variant-chip.soon {
-  cursor: default;
-  opacity: 0.55;
-  border-style: dashed;
-}
-.variant-chip:active:not(.soon) { transform: scale(0.94); }
-.variant-chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 /* ---------- generic ---------- */
 .panel {
