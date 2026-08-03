@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import Locker from "./components/Locker.jsx";
 import Scan from "./components/Scan.jsx";
 import Trade from "./components/Trade.jsx";
-import { loadCollection, setOwned, setManyOwned, clearCollection } from "./lib/db.js";
+import {
+  loadCollection,
+  setEntry,
+  setManyOwned,
+  setManyMastered,
+  clearCollection,
+} from "./lib/db.js";
 import { RELEASED_ENTRIES } from "./data/sprites.js";
 
 const TABS = [
@@ -14,11 +20,15 @@ const TABS = [
 export default function App() {
   const [tab, setTab] = useState("locker");
   const [owned, setOwnedState] = useState(new Set());
+  const [mastered, setMasteredState] = useState(new Set());
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
 
   useEffect(() => {
-    loadCollection().then(setOwnedState);
+    loadCollection().then(({ owned, mastered }) => {
+      setOwnedState(owned);
+      setMasteredState(mastered);
+    });
   }, []);
 
   function showToast(msg) {
@@ -27,33 +37,71 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(""), 2600);
   }
 
+  // Tap cycle: none -> owned -> mastered -> none
   function toggle(entryId) {
+    const isOwned = owned.has(entryId);
+    const isMastered = mastered.has(entryId);
+    let state;
+    if (!isOwned) state = "owned";
+    else if (!isMastered) state = "mastered";
+    else state = "none";
+
     setOwnedState((prev) => {
       const next = new Set(prev);
-      const nowOwned = !next.has(entryId);
-      if (nowOwned) next.add(entryId);
-      else next.delete(entryId);
-      setOwned(entryId, nowOwned);
+      if (state === "none") next.delete(entryId);
+      else next.add(entryId);
       return next;
     });
+    setMasteredState((prev) => {
+      const next = new Set(prev);
+      if (state === "mastered") next.add(entryId);
+      else next.delete(entryId);
+      return next;
+    });
+    setEntry(entryId, state);
   }
 
+  // Scan/merge: adds as owned, never demotes an already-mastered entry.
   function addMany(entryIds) {
+    const fresh = entryIds.filter((id) => !owned.has(id));
     setOwnedState((prev) => {
       const next = new Set(prev);
-      for (const id of entryIds) next.add(id);
+      for (const id of fresh) next.add(id);
       return next;
     });
-    setManyOwned(entryIds);
+    setManyOwned(fresh);
+  }
+
+  // Trade merge: brings over owned + mastered from a friend/old-device code.
+  function mergeCollection(friendOwned, friendMastered) {
+    const freshOwned = [...friendOwned].filter(
+      (id) => !owned.has(id) && !friendMastered.has(id)
+    );
+    const freshMastered = [...friendMastered].filter((id) => !mastered.has(id));
+    setOwnedState((prev) => {
+      const next = new Set(prev);
+      for (const id of friendOwned) next.add(id);
+      for (const id of friendMastered) next.add(id);
+      return next;
+    });
+    setMasteredState((prev) => {
+      const next = new Set(prev);
+      for (const id of freshMastered) next.add(id);
+      return next;
+    });
+    setManyOwned(freshOwned);
+    setManyMastered(freshMastered);
   }
 
   function resetAll() {
     setOwnedState(new Set());
+    setMasteredState(new Set());
     clearCollection();
     showToast("Locker cleared");
   }
 
   const haveReleased = RELEASED_ENTRIES.filter((e) => owned.has(e.id)).length;
+  const masteredReleased = RELEASED_ENTRIES.filter((e) => mastered.has(e.id)).length;
   const total = RELEASED_ENTRIES.length;
   const pct = total ? Math.round((haveReleased / total) * 100) : 0;
 
@@ -66,7 +114,7 @@ export default function App() {
           </h1>
           <div className="completion">
             <div className="big">{haveReleased} / {total}</div>
-            <div className="sub">{pct}% extracted</div>
+            <div className="sub">{pct}% extracted · ★ {masteredReleased} mastered</div>
           </div>
         </div>
         <div className="progress-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
@@ -74,9 +122,18 @@ export default function App() {
         </div>
       </header>
 
-      {tab === "locker" && <Locker owned={owned} toggle={toggle} resetAll={resetAll} />}
+      {tab === "locker" && (
+        <Locker owned={owned} mastered={mastered} toggle={toggle} resetAll={resetAll} />
+      )}
       {tab === "scan" && <Scan owned={owned} addMany={addMany} showToast={showToast} />}
-      {tab === "trade" && <Trade owned={owned} addMany={addMany} showToast={showToast} />}
+      {tab === "trade" && (
+        <Trade
+          owned={owned}
+          mastered={mastered}
+          mergeCollection={mergeCollection}
+          showToast={showToast}
+        />
+      )}
 
       <nav className="tabbar">
         {TABS.map((t) => (

@@ -1,4 +1,6 @@
-// Share codes: SPR1|<dataset version>|<base64url bitfield>
+// Share codes:
+//   SPR2|<dataset version>|<owned bitfield>|<mastered bitfield>  (current)
+//   SPR1|<dataset version>|<owned bitfield>                      (legacy, still decodes)
 // Bit i corresponds to ENTRIES[i] in fixed dataset order.
 import { ENTRIES, DATASET_VERSION } from "../data/sprites.js";
 
@@ -36,23 +38,47 @@ function b64urlToBytes(str) {
   return new Uint8Array(bytes);
 }
 
-export function encodeCollection(ownedSet) {
+function setToBits(set) {
   const bytes = new Uint8Array(Math.ceil(ENTRIES.length / 8));
   ENTRIES.forEach((e, i) => {
-    if (ownedSet.has(e.id)) bytes[i >> 3] |= 1 << (i & 7);
+    if (set.has(e.id)) bytes[i >> 3] |= 1 << (i & 7);
   });
-  return `SPR1|${DATASET_VERSION}|${bytesToB64url(bytes)}`;
+  return bytesToB64url(bytes);
 }
 
-// Returns { owned:Set<entryId>, versionMismatch:boolean } or throws on garbage.
+function bitsToSet(payload) {
+  const bytes = b64urlToBytes(payload);
+  const set = new Set();
+  ENTRIES.forEach((e, i) => {
+    if (i >> 3 < bytes.length && (bytes[i >> 3] >> (i & 7)) & 1) set.add(e.id);
+  });
+  return set;
+}
+
+export function encodeCollection(ownedSet, masteredSet = new Set()) {
+  return `SPR2|${DATASET_VERSION}|${setToBits(ownedSet)}|${setToBits(masteredSet)}`;
+}
+
+// Returns { owned:Set, mastered:Set, versionMismatch:boolean } or throws on garbage.
 export function decodeCollection(code) {
   const parts = String(code).trim().split("|");
-  if (parts.length !== 3 || parts[0] !== "SPR1") throw new Error("Not a Sprite Locker code");
-  const [, version, payload] = parts;
-  const bytes = b64urlToBytes(payload);
-  const owned = new Set();
-  ENTRIES.forEach((e, i) => {
-    if (i >> 3 < bytes.length && (bytes[i >> 3] >> (i & 7)) & 1) owned.add(e.id);
-  });
-  return { owned, versionMismatch: version !== DATASET_VERSION, version };
+  if (parts[0] === "SPR1" && parts.length === 3) {
+    const [, version, payload] = parts;
+    return {
+      owned: bitsToSet(payload),
+      mastered: new Set(),
+      versionMismatch: version !== DATASET_VERSION,
+      version,
+    };
+  }
+  if (parts[0] === "SPR2" && parts.length === 4) {
+    const [, version, ownedPayload, masteredPayload] = parts;
+    return {
+      owned: bitsToSet(ownedPayload),
+      mastered: bitsToSet(masteredPayload),
+      versionMismatch: version !== DATASET_VERSION,
+      version,
+    };
+  }
+  throw new Error("Not a Sprite Locker code");
 }

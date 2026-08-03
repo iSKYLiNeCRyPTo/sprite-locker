@@ -2,12 +2,12 @@ import { useMemo, useState } from "react";
 import { encodeCollection, decodeCollection } from "../lib/code.js";
 import { RELEASED_ENTRIES, RARITIES } from "../data/sprites.js";
 
-export default function Trade({ owned, addMany, showToast }) {
+export default function Trade({ owned, mastered, mergeCollection, showToast }) {
   const [pasted, setPasted] = useState("");
-  const [friend, setFriend] = useState(null); // { owned, versionMismatch }
+  const [friend, setFriend] = useState(null); // { owned, mastered, versionMismatch }
   const [error, setError] = useState("");
 
-  const myCode = useMemo(() => encodeCollection(owned), [owned]);
+  const myCode = useMemo(() => encodeCollection(owned, mastered), [owned, mastered]);
 
   async function copyCode() {
     try {
@@ -45,8 +45,7 @@ export default function Trade({ owned, addMany, showToast }) {
 
   function importAsMine() {
     if (!friend) return;
-    const ids = [...friend.owned];
-    addMany(ids);
+    mergeCollection(friend.owned, friend.mastered);
     showToast("Merged into your locker");
   }
 
@@ -58,7 +57,8 @@ export default function Trade({ owned, addMany, showToast }) {
         {items.map((e) => (
           <li key={e.id}>
             <span className="dot" style={{ background: RARITIES[e.sprite.rarity].color }} />
-            <span aria-hidden="true">{e.sprite.emoji}</span>
+            <img className="trade-img" src={e.img} alt="" loading="lazy"
+              onError={(ev) => { ev.currentTarget.outerHTML = `<span>${e.sprite.emoji}</span>`; }} />
             <span>{e.label}</span>
           </li>
         ))}

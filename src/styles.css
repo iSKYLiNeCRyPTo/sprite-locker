@@ -168,6 +168,24 @@ button { font-family: inherit; }
   display: flex;
   gap: 10px;
   align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sprite-head:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 8px; }
+.sprite-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  object-fit: contain;
+  flex-shrink: 0;
 }
 .sprite-emoji {
   width: 44px;
@@ -231,6 +249,14 @@ button { font-family: inherit; }
   display: block;
   filter: grayscale(1) brightness(0.45);
 }
+.variant-chip .v-img {
+  width: 36px;
+  height: 36px;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  filter: grayscale(1) brightness(0.45);
+}
 .variant-chip .v-name {
   font-size: 9px;
   font-weight: 700;
@@ -245,6 +271,38 @@ button { font-family: inherit; }
   box-shadow: 0 0 14px -2px var(--glow), inset 0 0 10px -6px var(--glow);
 }
 .variant-chip.owned .v-emoji { filter: none; }
+.variant-chip.owned .v-img { filter: none; }
+
+/* expanded detail view */
+.sprite-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.detail-row { display: grid; gap: 2px; }
+.detail-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+}
+.detail-drops { display: grid; gap: 2px; }
+.drop-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.drop-line b { font-variant-numeric: tabular-nums; }
+.variant-chip.mastered {
+  border-color: var(--mythic, #f2c14e);
+  box-shadow: 0 0 18px -2px var(--glow), inset 0 0 12px -4px var(--glow);
+}
+.variant-chip.mastered .v-name { color: var(--mythic, #f2c14e); }
+.nums-max { color: var(--mythic, #f2c14e); font-weight: 700; }
 .variant-chip.soon {
   cursor: default;
   opacity: 0.55;
@@ -411,6 +469,7 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
   font-size: 13px;
 }
 .trade-list li:last-child { border-bottom: none; }
+.trade-img { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
 .dot { width: 8px; height: 8px; border-radius: 99px; flex-shrink: 0; }
 .match-banner {
   border-radius: var(--radius);
