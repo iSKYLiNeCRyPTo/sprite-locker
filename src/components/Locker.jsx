@@ -3,7 +3,7 @@ import { BUYBACK, BUYBACK_CURRENCY, ENTRIES, RARITIES, RELEASED_ENTRIES } from "
 
 const STATUS = ["All", "Owned", "Missing", "Lost"];
 
-export default function Locker({ owned, mastered, lost, toggle, toggleMastered, resetAll }) {
+export default function Locker({ owned, mastered, lost, toggle, toggleMastered, clearEntry, resetAll }) {
   const [status, setStatus] = useState("All");
   const [rarity, setRarity] = useState(null);
   const [query, setQuery] = useState("");
@@ -53,6 +53,12 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
   const detailPrice = detailBuyback
     ? (detailEntry.variant.id === "normal" ? detailBuyback.normal : detailBuyback.special)
     : null;
+  const detailHasStatus = detailEntry && (owned.has(detailEntry.id) || lost.has(detailEntry.id));
+
+  function clearDetail() {
+    clearEntry(detailEntry.id);
+    setDetailId(null);
+  }
 
   return (
     <div>
@@ -236,6 +242,11 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
                   </div>
                 )}
               </div>
+              {detailHasStatus && (
+                <button className="btn secondary block modal-clear" onClick={clearDetail}>
+                  Mark as not owned
+                </button>
+              )}
             </div>
           </div>
         </div>

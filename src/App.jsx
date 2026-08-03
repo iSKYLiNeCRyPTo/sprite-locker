@@ -74,6 +74,27 @@ export default function App() {
     setEntry(entryId, lost.has(entryId) ? "lost" : "owned", next);
   }
 
+  // Full per-entry reset back to "none" — owned, lost, and mastered all
+  // clear. For undoing a mis-tap without wiping the whole collection.
+  function clearEntry(entryId) {
+    setOwnedState((prev) => {
+      const next = new Set(prev);
+      next.delete(entryId);
+      return next;
+    });
+    setLostState((prev) => {
+      const next = new Set(prev);
+      next.delete(entryId);
+      return next;
+    });
+    setMasteredState((prev) => {
+      const next = new Set(prev);
+      next.delete(entryId);
+      return next;
+    });
+    setEntry(entryId, "none");
+  }
+
   // Trade merge: brings over owned + mastered from a friend/old-device code.
   function mergeCollection(friendOwned, friendMastered) {
     const freshOwned = [...friendOwned].filter(
@@ -142,6 +163,7 @@ export default function App() {
           lost={lost}
           toggle={toggle}
           toggleMastered={toggleMastered}
+          clearEntry={clearEntry}
           resetAll={resetAll}
         />
       )}

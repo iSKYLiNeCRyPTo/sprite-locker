@@ -271,6 +271,8 @@ button { font-family: inherit; }
 .entry-card.is-mastered { border-color: var(--mythic, #f2c14e); box-shadow: 0 0 14px -3px var(--mythic, #f2c14e); }
 .entry-status.lost { color: #fff; background: var(--danger); }
 .entry-card.state-lost { border-color: var(--danger); box-shadow: 0 0 12px -4px var(--danger); }
+.entry-card.state-lost .entry-media { opacity: 0.5; filter: grayscale(0.7); }
+.entry-card.state-lost .entry-body { opacity: 0.6; }
 .entry-card.soon { opacity: 0.5; }
 
 .entry-master {
@@ -396,6 +398,7 @@ button { font-family: inherit; }
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+.modal-clear { margin-top: 14px; }
 .detail-label {
   font-size: 10px;
   font-weight: 700;
