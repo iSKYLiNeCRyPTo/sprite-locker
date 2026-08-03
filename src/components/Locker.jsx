@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BUYBACK, BUYBACK_CURRENCY, ENTRIES, RARITIES, RELEASED_ENTRIES, VARIANTS } from "../data/sprites.js";
+import { BUYBACK, BUYBACK_CURRENCY, ENTRIES, RARITIES, RELEASED_ENTRIES } from "../data/sprites.js";
 
 const STATUS = ["All", "Owned", "Missing", "Lost"];
 
@@ -8,7 +8,7 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
   const [rarity, setRarity] = useState(null);
   const [query, setQuery] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
-  const [detailId, setDetailId] = useState(null); // sprite id or null
+  const [detailId, setDetailId] = useState(null); // entry id or null
 
   const rarityTotals = useMemo(() => {
     const t = {};
@@ -48,8 +48,11 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
     return [...list].sort((a, b) => groupRank(a) - groupRank(b));
   }, [status, rarity, query, owned, lost]);
 
-  const detailSprite = detailId ? ENTRIES.find((e) => e.sprite.id === detailId)?.sprite : null;
-  const detailBuyback = detailSprite ? BUYBACK[detailSprite.rarity] : null;
+  const detailEntry = detailId ? ENTRIES.find((e) => e.id === detailId) : null;
+  const detailBuyback = detailEntry ? BUYBACK[detailEntry.sprite.rarity] : null;
+  const detailPrice = detailBuyback
+    ? (detailEntry.variant.id === "normal" ? detailBuyback.normal : detailBuyback.special)
+    : null;
 
   return (
     <div>
@@ -134,7 +137,7 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
             >
               <button
                 className="entry-media"
-                onClick={() => setDetailId(e.sprite.id)}
+                onClick={() => setDetailId(e.id)}
                 aria-label={`${e.label} details`}
               >
                 <img
@@ -178,51 +181,33 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
         })}
       </div>
 
-      {detailSprite && (
+      {detailEntry && (
         <div className="modal-overlay" onClick={() => setDetailId(null)}>
           <div className="modal" onClick={(ev) => ev.stopPropagation()}>
             <button className="modal-close" onClick={() => setDetailId(null)} aria-label="Close">×</button>
-            <h3 className="display" style={{ marginTop: 0 }}>{detailSprite.name}</h3>
+            <h3 className="display" style={{ marginTop: 0 }}>{detailEntry.label}</h3>
             <div className="sprite-detail">
               <div className="detail-row">
                 <span className="detail-label">Ability</span>
-                <span>{detailSprite.ability}</span>
+                <span>{detailEntry.sprite.ability}</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Location</span>
-                <span>{detailSprite.where}</span>
+                <span>{detailEntry.sprite.where}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Drop chance</span>
+                <span>
+                  {detailEntry.drop === "0%" ? "Not in chests" : detailEntry.drop}
+                  {!detailEntry.released ? " (coming soon)" : ""}
+                </span>
               </div>
               {detailBuyback && (
                 <div className="detail-row">
                   <span className="detail-label">Buy-back cost (interim — tbc)</span>
-                  <span className="detail-drops">
-                    {detailSprite.variants.map((v) => {
-                      const variant = VARIANTS.find((x) => x.id === v.v);
-                      const price = v.v === "normal" ? detailBuyback.normal : detailBuyback.special;
-                      return (
-                        <span className="drop-line" key={v.v}>
-                          <span>{variant.name}</span>
-                          <b>{price.toLocaleString()} {BUYBACK_CURRENCY}</b>
-                        </span>
-                      );
-                    })}
-                  </span>
+                  <span>{detailPrice.toLocaleString()} {BUYBACK_CURRENCY}</span>
                 </div>
               )}
-              <div className="detail-row">
-                <span className="detail-label">Drop chances</span>
-                <span className="detail-drops">
-                  {detailSprite.variants.map((v) => {
-                    const variant = VARIANTS.find((x) => x.id === v.v);
-                    return (
-                      <span className="drop-line" key={v.v}>
-                        <span>{variant.name}{v.u ? " (soon)" : ""}</span>
-                        <b>{v.d === "0%" ? "not in chests" : v.d}</b>
-                      </span>
-                    );
-                  })}
-                </span>
-              </div>
             </div>
           </div>
         </div>

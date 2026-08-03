@@ -331,14 +331,6 @@ button { font-family: inherit; }
   letter-spacing: 0.05em;
   color: var(--dim);
 }
-.detail-drops { display: grid; gap: 2px; }
-.drop-line {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-.drop-line b { font-variant-numeric: tabular-nums; }
-
 /* ---------- generic ---------- */
 .panel {
   background: var(--panel);
