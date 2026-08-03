@@ -184,31 +184,55 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
 
       {detailEntry && (
         <div className="modal-overlay" onClick={() => setDetailId(null)}>
-          <div className="modal" onClick={(ev) => ev.stopPropagation()}>
+          <div
+            className="modal"
+            onClick={(ev) => ev.stopPropagation()}
+            style={{ "--glow": RARITIES[detailEntry.sprite.rarity].color }}
+          >
             <button className="modal-close" onClick={() => setDetailId(null)} aria-label="Close">×</button>
-            <h3 className="display" style={{ marginTop: 0 }}>{detailEntry.label}</h3>
+            <div className="modal-hero">
+              <img
+                className="modal-img"
+                src={detailEntry.img}
+                alt=""
+                onError={(ev) => { ev.currentTarget.outerHTML = `<span class="modal-emoji">${detailEntry.sprite.emoji}</span>`; }}
+              />
+            </div>
+            <div className="modal-title-row">
+              <h3 className="display modal-name">{detailEntry.label}</h3>
+              <span
+                className="rarity-pill"
+                style={{ background: RARITIES[detailEntry.sprite.rarity].color }}
+              >
+                {RARITIES[detailEntry.sprite.rarity].name}
+              </span>
+            </div>
             <div className="sprite-detail">
-              <div className="detail-row">
+              <div className="detail-card">
                 <span className="detail-label">Ability</span>
-                <span>{detailEntry.sprite.ability}</span>
+                <span className="detail-value">{detailEntry.sprite.ability}</span>
               </div>
-              <div className="detail-row">
+              <div className="detail-card">
                 <span className="detail-label">Location</span>
-                <span>{detailEntry.sprite.where}</span>
+                <span className="detail-value">{detailEntry.sprite.where}</span>
               </div>
-              <div className="detail-row">
-                <span className="detail-label">Drop chance</span>
-                <span>
-                  {detailEntry.drop === "0%" ? "Not in chests" : detailEntry.drop}
-                  {!detailEntry.released ? " (coming soon)" : ""}
-                </span>
-              </div>
-              {detailBuyback && (
-                <div className="detail-row">
-                  <span className="detail-label">Buy-back cost (interim — tbc)</span>
-                  <span>{detailPrice.toLocaleString()} {BUYBACK_CURRENCY}</span>
+              <div className="detail-card-row">
+                <div className="detail-card">
+                  <span className="detail-label">Drop chance</span>
+                  <span className="detail-value big">
+                    {detailEntry.drop === "0%" ? "Not in chests" : detailEntry.drop}
+                    {!detailEntry.released ? " (soon)" : ""}
+                  </span>
                 </div>
-              )}
+                {detailBuyback && (
+                  <div className="detail-card">
+                    <span className="detail-label">Buy-back (tbc)</span>
+                    <span className="detail-value big">
+                      {detailPrice.toLocaleString()} <small>{BUYBACK_CURRENCY}</small>
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
