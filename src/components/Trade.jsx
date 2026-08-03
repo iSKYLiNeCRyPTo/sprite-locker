@@ -32,6 +32,8 @@ export default function Trade({ owned, mastered, mergeCollection, showToast }) {
     if (!friend) return null;
     const youGive = [];
     const youGet = [];
+    const youAreAhead = []; // both own it; you've mastered it, they haven't
+    const theyAreAhead = []; // both own it; they've mastered it, you haven't
     let bothMissing = 0;
     for (const e of RELEASED_ENTRIES) {
       const mine = owned.has(e.id);
@@ -39,9 +41,15 @@ export default function Trade({ owned, mastered, mergeCollection, showToast }) {
       if (mine && !theirs) youGive.push(e);
       else if (!mine && theirs) youGet.push(e);
       else if (!mine && !theirs) bothMissing++;
+      else {
+        const myMastery = mastered.has(e.id);
+        const theirMastery = friend.mastered.has(e.id);
+        if (myMastery && !theirMastery) youAreAhead.push(e);
+        else if (theirMastery && !myMastery) theyAreAhead.push(e);
+      }
     }
-    return { youGive, youGet, bothMissing };
-  }, [friend, owned]);
+    return { youGive, youGet, bothMissing, youAreAhead, theyAreAhead };
+  }, [friend, owned, mastered]);
 
   function importAsMine() {
     if (!friend) return;
@@ -49,7 +57,7 @@ export default function Trade({ owned, mastered, mergeCollection, showToast }) {
     showToast("Merged into your locker");
   }
 
-  const List = ({ items, emptyText }) => (
+  const List = ({ items, emptyText, masteredSet }) => (
     items.length === 0 ? (
       <div className="empty">{emptyText}</div>
     ) : (
@@ -60,6 +68,9 @@ export default function Trade({ owned, mastered, mergeCollection, showToast }) {
             <img className="trade-img" src={e.img} alt="" loading="lazy"
               onError={(ev) => { ev.currentTarget.outerHTML = `<span>${e.sprite.emoji}</span>`; }} />
             <span>{e.label}</span>
+            {masteredSet.has(e.id) && (
+              <span className="trade-crown" title="Mastered" aria-label="Mastered">👑</span>
+            )}
           </li>
         ))}
       </ul>
@@ -124,15 +135,49 @@ export default function Trade({ owned, mastered, mergeCollection, showToast }) {
 
           <div className="panel">
             <h2 className="display">You can get ({diff.youGet.length})</h2>
-            <p className="hint">They own these; you don't.</p>
-            <List items={diff.youGet} emptyText="Nothing they have that you're missing." />
+            <p className="hint">They own these; you don't. 👑 = they've mastered it.</p>
+            <List
+              items={diff.youGet}
+              emptyText="Nothing they have that you're missing."
+              masteredSet={friend.mastered}
+            />
           </div>
 
           <div className="panel">
             <h2 className="display">You can give ({diff.youGive.length})</h2>
-            <p className="hint">You own these; they don't.</p>
-            <List items={diff.youGive} emptyText="You've got nothing they're missing." />
+            <p className="hint">You own these; they don't. 👑 = you've mastered it — think twice before trading it away.</p>
+            <List
+              items={diff.youGive}
+              emptyText="You've got nothing they're missing."
+              masteredSet={mastered}
+            />
           </div>
+
+          {(diff.theyAreAhead.length > 0 || diff.youAreAhead.length > 0) && (
+            <div className="panel">
+              <h2 className="display">Mastery gap</h2>
+              <p className="hint">
+                You both already own these — nothing to give or get — but only
+                one of you has mastered them.
+              </p>
+              {diff.theyAreAhead.length > 0 && (
+                <>
+                  <p className="hint" style={{ marginBottom: 4 }}>
+                    👑 They've mastered, you haven't ({diff.theyAreAhead.length})
+                  </p>
+                  <List items={diff.theyAreAhead} emptyText="" masteredSet={friend.mastered} />
+                </>
+              )}
+              {diff.youAreAhead.length > 0 && (
+                <>
+                  <p className="hint" style={{ margin: diff.theyAreAhead.length > 0 ? "12px 0 4px" : "0 0 4px" }}>
+                    👑 You've mastered, they haven't ({diff.youAreAhead.length})
+                  </p>
+                  <List items={diff.youAreAhead} emptyText="" masteredSet={mastered} />
+                </>
+              )}
+            </div>
+          )}
 
           <div className="panel">
             <h2 className="display">Other tools</h2>
