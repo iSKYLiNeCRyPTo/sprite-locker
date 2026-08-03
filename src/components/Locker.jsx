@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BUYBACK, ENTRIES, RARITIES, RELEASED_ENTRIES, VARIANTS } from "../data/sprites.js";
+import { BUYBACK, BUYBACK_CURRENCY, ENTRIES, RARITIES, RELEASED_ENTRIES, VARIANTS } from "../data/sprites.js";
 
 const STATUS = ["All", "Owned", "Missing", "Lost"];
 
@@ -194,8 +194,19 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
               </div>
               {detailBuyback && (
                 <div className="detail-row">
-                  <span className="detail-label">Buy-back cost</span>
-                  <span>{detailBuyback.price} {detailBuyback.currency}</span>
+                  <span className="detail-label">Buy-back cost (interim — tbc)</span>
+                  <span className="detail-drops">
+                    {detailSprite.variants.map((v) => {
+                      const variant = VARIANTS.find((x) => x.id === v.v);
+                      const price = v.v === "normal" ? detailBuyback.normal : detailBuyback.special;
+                      return (
+                        <span className="drop-line" key={v.v}>
+                          <span>{variant.name}</span>
+                          <b>{price.toLocaleString()} {BUYBACK_CURRENCY}</b>
+                        </span>
+                      );
+                    })}
+                  </span>
                 </div>
               )}
               <div className="detail-row">
