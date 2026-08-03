@@ -1,28 +1,14 @@
 import { useMemo, useState } from "react";
-import { ENTRIES, RARITIES, RELEASED_ENTRIES, VARIANTS } from "../data/sprites.js";
+import { BUYBACK, ENTRIES, RARITIES, RELEASED_ENTRIES, VARIANTS } from "../data/sprites.js";
 
 const STATUS = ["All", "Owned", "Missing", "Lost"];
 
-const STATE_LABEL = {
-  none: "Not owned",
-  owned: "Owned",
-  mastered: "★ Mastered",
-  lost: "Lost — buy back",
-};
-
-export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
+export default function Locker({ owned, mastered, lost, toggle, toggleMastered, resetAll }) {
   const [status, setStatus] = useState("All");
   const [rarity, setRarity] = useState(null);
   const [query, setQuery] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const [detailId, setDetailId] = useState(null); // sprite id or null
-
-  function stateOf(entryId) {
-    if (lost.has(entryId)) return "lost";
-    if (mastered.has(entryId)) return "mastered";
-    if (owned.has(entryId)) return "owned";
-    return "none";
-  }
 
   const rarityTotals = useMemo(() => {
     const t = {};
@@ -35,6 +21,16 @@ export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
     }
     return t;
   }, [owned, mastered, lost]);
+
+  // Owned sprites sort to the top, then lost (buy-back) ones, then never-owned.
+  // Unreleased entries always sink to the very end. Order is stable within
+  // each group, so dataset order still applies as the tiebreaker.
+  function groupRank(e) {
+    if (!e.released) return 3;
+    if (owned.has(e.id)) return 0;
+    if (lost.has(e.id)) return 1;
+    return 2;
+  }
 
   const visibleEntries = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -49,11 +45,11 @@ export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
       if (status === "Lost") return lost.has(e.id);
       return true;
     });
-    // Unreleased entries sink to the end (display only — dataset order untouched).
-    return [...list].sort((a, b) => (a.released ? 0 : 1) - (b.released ? 0 : 1));
+    return [...list].sort((a, b) => groupRank(a) - groupRank(b));
   }, [status, rarity, query, owned, lost]);
 
   const detailSprite = detailId ? ENTRIES.find((e) => e.sprite.id === detailId)?.sprite : null;
+  const detailBuyback = detailSprite ? BUYBACK[detailSprite.rarity] : null;
 
   return (
     <div>
@@ -104,7 +100,10 @@ export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
       </div>
 
       <p className="hint" style={{ margin: "0 0 10px" }}>
-        Tap the image for details. Tap the status to cycle: owned → ★ mastered → lost (buy back) → clear.
+        Owned sprites sort to the top. Tap the image for details. Tap the
+        status to toggle owned ↔ lost (buy back) — the ★ star marks mastery
+        separately and stays put even if you lose the sprite and buy it
+        back.
       </p>
 
       {visibleEntries.length === 0 && (
@@ -114,11 +113,22 @@ export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
       <div className="entry-grid">
         {visibleEntries.map((e) => {
           const soon = !e.released;
-          const state = soon ? "none" : stateOf(e.id);
+          const isOwned = owned.has(e.id);
+          const isLost = lost.has(e.id);
+          const isMastered = mastered.has(e.id);
+          const state = soon ? "none" : isLost ? "lost" : isOwned ? "owned" : "none";
           const color = RARITIES[e.sprite.rarity].color;
+          const statusLabel = soon
+            ? "Soon"
+            : isLost
+              ? "Lost — buy back"
+              : isOwned
+                ? isMastered ? "★ Mastered" : "Owned"
+                : "Not owned";
+          const canMaster = !soon && (isOwned || isLost);
           return (
             <div
-              className={`entry-card state-${state} ${soon ? "soon" : ""}`}
+              className={`entry-card state-${state} ${soon ? "soon" : ""} ${isMastered ? "is-mastered" : ""}`}
               key={e.id}
               style={{ "--glow": color }}
             >
@@ -144,14 +154,25 @@ export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
                   <span className="entry-drop">{soon ? "soon" : e.drop === "0%" ? "—" : e.drop}</span>
                 </div>
               </div>
-              <button
-                className={`entry-status ${state}`}
-                disabled={soon}
-                onClick={() => toggle(e.id)}
-                aria-label={`${e.label} — ${soon ? "coming soon" : STATE_LABEL[state]}. Tap to change.`}
-              >
-                {soon ? "Soon" : STATE_LABEL[state]}
-              </button>
+              <div className="entry-actions">
+                <button
+                  className={`entry-status ${state}`}
+                  disabled={soon}
+                  onClick={() => toggle(e.id)}
+                  aria-label={`${e.label} — ${statusLabel}. Tap to change.`}
+                >
+                  {statusLabel}
+                </button>
+                <button
+                  className={`entry-master ${isMastered ? "on" : ""}`}
+                  disabled={!canMaster}
+                  onClick={() => toggleMastered(e.id)}
+                  aria-label={`${e.label} — ${isMastered ? "mastered, tap to unmark" : "mark as mastered"}`}
+                  title={isMastered ? "Mastered — tap to unmark" : "Mark as mastered"}
+                >
+                  ★
+                </button>
+              </div>
             </div>
           );
         })}
@@ -171,6 +192,12 @@ export default function Locker({ owned, mastered, lost, toggle, resetAll }) {
                 <span className="detail-label">Location</span>
                 <span>{detailSprite.where}</span>
               </div>
+              {detailBuyback && (
+                <div className="detail-row">
+                  <span className="detail-label">Buy-back cost</span>
+                  <span>{detailBuyback.price} {detailBuyback.currency}</span>
+                </div>
+              )}
               <div className="detail-row">
                 <span className="detail-label">Drop chances</span>
                 <span className="detail-drops">

@@ -25,6 +25,15 @@ export const RARITIES = {
   mythic: { name: "Mythic", color: "#f2c14e" },
 };
 
+// Placeholder buy-back costs by rarity — plug in the real prices/currency
+// once confirmed; shown in the Locker's sprite detail modal.
+export const BUYBACK = {
+  rare: { price: 150, currency: "Bars" },
+  epic: { price: 300, currency: "Bars" },
+  legendary: { price: 600, currency: "Bars" },
+  mythic: { price: 1200, currency: "Bars" },
+};
+
 // Images live in public/sprites/{spriteId}-{variantId}.webp (from fortnite.gg).
 // v: variant id, u: true if not yet released ("coming soon"),
 // d: Sprite Chest drop chance per fortnite.gg ("0%" = not currently in chests)
