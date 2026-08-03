@@ -140,6 +140,7 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
                 onClick={() => setDetailId(e.id)}
                 aria-label={`${e.label} details`}
               >
+                {isMastered && <span className="entry-crown" aria-hidden="true">👑</span>}
                 <img
                   className="entry-img"
                   src={e.img}
