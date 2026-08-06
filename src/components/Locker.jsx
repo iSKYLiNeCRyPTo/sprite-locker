@@ -10,6 +10,7 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
   const [sortMastered, setSortMastered] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [detailId, setDetailId] = useState(null); // entry id or null
+  const [showHint, setShowHint] = useState(false);
 
   const rarityTotals = useMemo(() => {
     const t = {};
@@ -121,15 +122,25 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
         >
           ★ Mastered first
         </button>
+        <button
+          className={`chip hint-toggle ${showHint ? "on" : ""}`}
+          onClick={() => setShowHint((v) => !v)}
+          aria-pressed={showHint}
+          aria-label="How this works"
+        >
+          ⓘ
+        </button>
       </div>
 
-      <p className="hint" style={{ margin: "0 0 10px" }}>
-        Owned sprites sort to the top. Tap the image for details. Tap the
-        status to toggle owned ↔ lost (buy back) — the ★ star marks mastery
-        separately and stays put even if you lose the sprite and buy it
-        back. Toggle "★ Mastered first" to bring mastered sprites to the
-        top of their group.
-      </p>
+      {showHint && (
+        <p className="hint" style={{ margin: "0 0 10px" }}>
+          Owned sprites sort to the top. Tap the image for details. Tap the
+          status to toggle owned ↔ lost (buy back) — the ★ star marks mastery
+          separately and stays put even if you lose the sprite and buy it
+          back. Toggle "★ Mastered first" to bring mastered sprites to the
+          top of their group.
+        </p>
+      )}
 
       {visibleEntries.length === 0 && (
         <div className="empty">No sprites match. Clear a filter to see more.</div>
