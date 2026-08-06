@@ -7,6 +7,7 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
   const [status, setStatus] = useState("All");
   const [rarity, setRarity] = useState(null);
   const [query, setQuery] = useState("");
+  const [sortMastered, setSortMastered] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [detailId, setDetailId] = useState(null); // entry id or null
 
@@ -45,8 +46,15 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
       if (status === "Lost") return lost.has(e.id);
       return true;
     });
-    return [...list].sort((a, b) => groupRank(a) - groupRank(b));
-  }, [status, rarity, query, owned, lost]);
+    return [...list].sort((a, b) => {
+      if (sortMastered) {
+        const am = mastered.has(a.id) ? 0 : 1;
+        const bm = mastered.has(b.id) ? 0 : 1;
+        if (am !== bm) return am - bm;
+      }
+      return groupRank(a) - groupRank(b);
+    });
+  }, [status, rarity, query, owned, lost, mastered, sortMastered]);
 
   const detailEntry = detailId ? ENTRIES.find((e) => e.id === detailId) : null;
   const detailBuyback = detailEntry ? BUYBACK[detailEntry.sprite.rarity] : null;
@@ -106,13 +114,21 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
             {r.name}
           </button>
         ))}
+        <button
+          className={`chip ${sortMastered ? "on" : ""}`}
+          onClick={() => setSortMastered((v) => !v)}
+          aria-pressed={sortMastered}
+        >
+          ★ Mastered first
+        </button>
       </div>
 
       <p className="hint" style={{ margin: "0 0 10px" }}>
         Owned sprites sort to the top. Tap the image for details. Tap the
         status to toggle owned ↔ lost (buy back) — the ★ star marks mastery
         separately and stays put even if you lose the sprite and buy it
-        back.
+        back. Toggle "★ Mastered first" to bring mastered sprites to the
+        top of their group.
       </p>
 
       {visibleEntries.length === 0 && (
