@@ -1,21 +1,23 @@
 // Fortnite Sprite dataset — Chapter 7 Season 3
 // Update this file per game patch, then bump DATASET_VERSION.
-// Released totals as of 2026-08-02: Rare 29, Epic 27, Legendary 30, Mythic 23 = 109.
-// Unreleased entries (Gem "coming soon" variants, Ironmouse) are included with
+// Released totals as of 2026-08-06: Rare 29, Epic 27, Legendary 30, Mythic 24 = 110.
+// Unreleased entries (Gem "coming soon" variants) are included with
 // released:false so they appear as silhouettes and slot in on release without
 // breaking saved data or share codes.
 
-export const DATASET_VERSION = "2026-08-02.1";
+export const DATASET_VERSION = "2026-08-06.1";
 
+// Every variant stacks its bonus on top of the sprite's own ability — e.g. a
+// Gummy Fire still releases its fiery burst, plus the Gummy bonus below.
 export const VARIANTS = [
-  { id: "normal", name: "Normal", tag: "N" },
-  { id: "gold", name: "Gold", tag: "AU" },
-  { id: "gummy", name: "Gummy", tag: "GU" },
-  { id: "galaxy", name: "Galaxy", tag: "GX" },
-  { id: "gem", name: "Gem", tag: "GM" },
-  { id: "holofoil", name: "Holofoil", tag: "HF" },
-  { id: "cube", name: "Cube", tag: "CB" },
-  { id: "quack", name: "Quack", tag: "QK" },
+  { id: "normal", name: "Normal", tag: "N", bonus: null },
+  { id: "gold", name: "Gold", tag: "AU", bonus: "+3× XP from eliminations." },
+  { id: "gummy", name: "Gummy", tag: "GU", bonus: "+20% Sprite Dust on extraction." },
+  { id: "galaxy", name: "Galaxy", tag: "GX", bonus: "+30% ammo when looting." },
+  { id: "gem", name: "Gem", tag: "GM", bonus: "-30% fall damage." },
+  { id: "holofoil", name: "Holofoil", tag: "HF", bonus: "+5% chance for your whole squad to find rare Sprite variants in chests." },
+  { id: "cube", name: "Cube", tag: "CB", bonus: "Overdrive while you're caught in the Storm." },
+  { id: "quack", name: "Quack", tag: "QK", bonus: "Bonus not yet announced." },
 ];
 
 export const RARITIES = {
@@ -148,9 +150,9 @@ export const SPRITES = [
     "The Simpsons Reload map — carries over to Battle Royale.",
     [{ v: "normal", d: "0%" }]),
   S("ironmouse", "Ironmouse", "🐭", "mythic",
-    "Not yet revealed.",
-    "Not yet available.",
-    [{ v: "normal", u: true, d: "2.14%" }]),
+    "Regenerates health over time when running low, granting Cloak and low gravity while it does.",
+    "Sprite Chests and Rare Chests across the map.",
+    [{ v: "normal", d: "2.14%" }]),
 ];
 
 const BASE = (import.meta.env && import.meta.env.BASE_URL) || "/";
