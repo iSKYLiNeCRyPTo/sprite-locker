@@ -221,6 +221,12 @@ export default function Locker({ owned, mastered, lost, toggle, toggleMastered, 
                 <span className="detail-label">Ability</span>
                 <span className="detail-value">{detailEntry.sprite.ability}</span>
               </div>
+              {detailEntry.variant.bonus && (
+                <div className="detail-card">
+                  <span className="detail-label">{detailEntry.variant.name} bonus</span>
+                  <span className="detail-value">{detailEntry.variant.bonus}</span>
+                </div>
+              )}
               <div className="detail-card">
                 <span className="detail-label">Location</span>
                 <span className="detail-value">{detailEntry.sprite.where}</span>
