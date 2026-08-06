@@ -279,6 +279,11 @@ button { font-family: inherit; }
 .entry-card.state-lost { border-color: var(--danger); box-shadow: 0 0 12px -4px var(--danger); }
 .entry-card.state-lost .entry-media { opacity: 0.5; filter: grayscale(0.7); }
 .entry-card.state-lost .entry-body { opacity: 0.6; }
+.entry-card.state-none:not(.soon) .entry-media {
+  background: var(--panel-2);
+  filter: grayscale(1) brightness(0.6);
+}
+.entry-card.state-none:not(.soon) .entry-body { opacity: 0.7; }
 .entry-card.soon { opacity: 0.5; }
 
 .entry-master {
