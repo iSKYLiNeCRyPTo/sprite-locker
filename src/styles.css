@@ -143,6 +143,12 @@ button { font-family: inherit; }
 .chip.on.rarity-legendary { background: var(--legendary); border-color: var(--legendary); }
 .chip.on.rarity-mythic { background: var(--mythic); border-color: var(--mythic); }
 
+.chip.hint-toggle {
+  margin-left: auto;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
 .search {
   width: 100%;
   background: var(--panel);
