@@ -1,11 +1,11 @@
 // Fortnite Sprite dataset — Chapter 7 Season 3
 // Update this file per game patch, then bump DATASET_VERSION.
-// Released totals as of 2026-08-06: Rare 29, Epic 27, Legendary 30, Mythic 24 = 110.
-// Unreleased entries (Gem "coming soon" variants) are included with
-// released:false so they appear as silhouettes and slot in on release without
-// breaking saved data or share codes.
+// Released totals as of 2026-08-09: Rare 31, Epic 30, Legendary 31, Mythic 26 = 118.
+// Unreleased entries are included with released:false so they appear as
+// silhouettes and slot in on release without breaking saved data or share
+// codes. Gem variants went live game-wide on 2026-08-09.
 
-export const DATASET_VERSION = "2026-08-06.1";
+export const DATASET_VERSION = "2026-08-09.1";
 
 // Every variant stacks its bonus on top of the sprite's own ability — e.g. a
 // Gummy Fire still releases its fiery burst, plus the Gummy bonus below.
@@ -56,11 +56,11 @@ export const SPRITES = [
   S("water", "Water", "💧", "rare",
     "Replenishes shields for you and nearby squadmates while in water.",
     "Near lakes, rivers and the coastline.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "gem", u: true, d: "0.37%" }, { v: "holofoil", d: "0.53%" }, { v: "quack", d: "0%" }]),
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "gem", d: "0.37%" }, { v: "holofoil", d: "0.53%" }, { v: "quack", d: "0%" }]),
   S("earth", "Earth", "🌿", "rare",
     "Chance for extra rare items from chests.",
     "Forests and wooded areas.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "gem", u: true, d: "0.37%" }, { v: "cube", d: "0.21%" }, { v: "quack", d: "0%" }]),
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "gem", d: "0.37%" }, { v: "cube", d: "0.21%" }, { v: "quack", d: "0%" }]),
   S("fire", "Fire", "🔥", "rare",
     "Releases a fiery burst after you deal enough damage.",
     "City and built-up POIs.",
@@ -76,7 +76,7 @@ export const SPRITES = [
   S("duck", "Duck", "🦆", "epic",
     "Emoting or jamming replenishes your shields.",
     "Sprite Chests across the map.",
-    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", u: true, d: "0.1%" }]),
+    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", d: "0.1%" }]),
   S("ghost", "Ghost", "👻", "epic",
     "Cloaks you on reload.",
     "Only spawns at night.",
@@ -84,7 +84,7 @@ export const SPRITES = [
   S("demon", "Demon", "😈", "epic",
     "Siphons health and shields on eliminations.",
     "Sprite Chests across the map.",
-    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", u: true, d: "0.1%" }]),
+    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", d: "0.1%" }]),
   S("king", "King", "👑", "epic",
     "Your pickaxe deals more damage.",
     "Sprite Chests across the map.",
@@ -92,7 +92,7 @@ export const SPRITES = [
   S("aura", "Aura", "✨", "epic",
     "Grants a Shock Rock charge after you deal enough damage.",
     "Chests and Supply Drops across the map.",
-    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", u: true, d: "0.08%" }]),
+    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", d: "0.08%" }]),
   S("striker", "Striker", "⚽", "epic",
     "Triggers Overdrive when you mantle, hurdle or wall scramble.",
     "Score a goal at the Soccer Pitch.",
@@ -104,7 +104,7 @@ export const SPRITES = [
   S("punk", "Punk", "🎸", "legendary",
     "Chance of infinite ammo.",
     "Chests only — a rarer spawn.",
-    [{ v: "normal", d: "4.45%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "gem", u: true, d: "0%" }, { v: "cube", d: "0.04%" }]),
+    [{ v: "normal", d: "4.45%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "gem", d: "0%" }, { v: "cube", d: "0.04%" }]),
   S("boss", "Boss", "💪", "legendary",
     "Boosts your maximum Health and Shield.",
     "Drops from any Boss you defeat.",
@@ -128,11 +128,11 @@ export const SPRITES = [
   S("grimreaper", "Grim Reaper", "💀", "mythic",
     "Anyone who attacks you gets marked.",
     "Chests across the map.",
-    [{ v: "normal", d: "0.15%" }, { v: "gold", d: "0.01%" }, { v: "gummy", d: "0.01%" }, { v: "galaxy", d: "0.01%" }, { v: "gem", u: true, d: "0.00099%" }, { v: "holofoil", d: "0%" }, { v: "cube", d: "0%" }]),
+    [{ v: "normal", d: "0.15%" }, { v: "gold", d: "0.01%" }, { v: "gummy", d: "0.01%" }, { v: "galaxy", d: "0.01%" }, { v: "gem", d: "0.00099%" }, { v: "holofoil", d: "0%" }, { v: "cube", d: "0%" }]),
   S("zeropoint", "Zero Point", "🔷", "mythic",
     "Spawns a Shield Bubble Jr. when you self-heal.",
     "Vault / keycard Sprite Chests — the rarest spawn.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.00014%" }, { v: "gummy", d: "0.000085%" }, { v: "galaxy", d: "0.000056%" }, { v: "gem", u: true, d: "0.00001%" }, { v: "holofoil", d: "0.00028%" }, { v: "cube", d: "0.000014%" }, { v: "quack", d: "0%" }]),
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.00014%" }, { v: "gummy", d: "0.000085%" }, { v: "galaxy", d: "0.000056%" }, { v: "gem", d: "0.00001%" }, { v: "holofoil", d: "0.00028%" }, { v: "cube", d: "0.000014%" }, { v: "quack", d: "0%" }]),
   S("burntpeanut", "Burnt Peanut", "🥜", "mythic",
     "Chance of extra loot on eliminations; mythic loot when maxed.",
     "Relic Chests (~1.5% chance).",
