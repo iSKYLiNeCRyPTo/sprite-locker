@@ -1,23 +1,35 @@
-// Fortnite Sprite dataset — Chapter 7 Season 3
+// Fortnite Sprite dataset — Chapter 7 Season 4 "Override"
 // Update this file per game patch, then bump DATASET_VERSION.
-// Released totals as of 2026-08-09: Rare 31, Epic 30, Legendary 31, Mythic 26 = 118.
-// Unreleased entries are included with released:false so they appear as
-// silhouettes and slot in on release without breaking saved data or share
-// codes. Gem variants went live game-wide on 2026-08-09.
+//
+// Override replaced the old Sprite Chest / 8-variant system entirely:
+// Sprite Chests are now Cheat Code Chests (find a Cheat Code Injector,
+// enter a directional sequence, get a guaranteed Sprite), and every Sprite
+// now has just three variants — Normal, Gold and Cheat Master — instead of
+// the old Gold/Gummy/Galaxy/Gem/Holofoil/Cube/Quack lineup. Because the
+// system changed, the whole Chapter 7 Season 3 roster (Water, Earth,
+// Batman, Grim Reaper, etc.) and its sprite images have been removed
+// rather than carried forward.
+//
+// Best-effort compiled 2026-08-24 from fortnite.gg (roster, rarities, the
+// Normal/Gold/Cheat Master variant split, and live drop %) plus press
+// coverage for ability/location text, since fortnite.gg itself hadn't
+// published drop rates yet (every entry showed "0%" in-app) — reconfirm
+// abilities/locations and swap in real drop %s once fortnite.gg has them.
+// Launch roster: Rare 5 (4 released + Storm Scout unreleased), Epic 4,
+// Legendary 1, Mythic 2 = 12 sprites, 33 released entries.
 
-export const DATASET_VERSION = "2026-08-09.1";
+export const DATASET_VERSION = "2026-08-24.1";
 
-// Every variant stacks its bonus on top of the sprite's own ability — e.g. a
-// Gummy Fire still releases its fiery burst, plus the Gummy bonus below.
+// Every variant stacks its bonus on top of the sprite's own ability.
 export const VARIANTS = [
   { id: "normal", name: "Normal", tag: "N", bonus: null },
   { id: "gold", name: "Gold", tag: "AU", bonus: "+3× XP from eliminations." },
-  { id: "gummy", name: "Gummy", tag: "GU", bonus: "+20% Sprite Dust on extraction." },
-  { id: "galaxy", name: "Galaxy", tag: "GX", bonus: "+30% ammo when looting." },
-  { id: "gem", name: "Gem", tag: "GM", bonus: "-30% fall damage." },
-  { id: "holofoil", name: "Holofoil", tag: "HF", bonus: "+5% chance for your whole squad to find rare Sprite variants in chests." },
-  { id: "cube", name: "Cube", tag: "CB", bonus: "Overdrive while you're caught in the Storm." },
-  { id: "quack", name: "Quack", tag: "QK", bonus: "Bonus not yet announced." },
+  {
+    id: "cheatmaster",
+    name: "Cheat Master",
+    tag: "CM",
+    bonus: "Cheat Code sequences accept any directional input — mash your way through them.",
+  },
 ];
 
 export const RARITIES = {
@@ -27,10 +39,10 @@ export const RARITIES = {
   mythic: { name: "Mythic", color: "#f2c14e" },
 };
 
-// Interim buy-back (resummon) costs by rarity, from user-supplied numbers —
-// swap in the fortnite.gg/sprites values once confirmed. "normal" is the
-// Normal variant's cost; "special" covers every other variant (Gold, Gummy,
-// Galaxy, Gem, Holofoil, Cube, Quack). Shown in the Locker's detail modal.
+// Interim buy-back (resummon) costs by rarity, carried over unchanged from
+// last season's user-supplied placeholders — swap in real Override numbers
+// once confirmed. "normal" is the Normal variant's cost; "special" covers
+// Gold and Cheat Master. Shown in the Locker's detail modal as "tbc".
 export const BUYBACK_CURRENCY = "Sprite Dust";
 export const BUYBACK = {
   rare: { normal: 100, special: 2700 },
@@ -53,106 +65,54 @@ const S = (id, name, emoji, rarity, ability, where, variants) => ({
 });
 
 export const SPRITES = [
-  S("water", "Water", "💧", "rare",
-    "Replenishes shields for you and nearby squadmates while in water.",
-    "Near lakes, rivers and the coastline.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "gem", d: "0.37%" }, { v: "holofoil", d: "0.53%" }, { v: "quack", d: "0%" }]),
-  S("earth", "Earth", "🌿", "rare",
-    "Chance for extra rare items from chests.",
-    "Forests and wooded areas.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "gem", d: "0.37%" }, { v: "cube", d: "0.21%" }, { v: "quack", d: "0%" }]),
-  S("fire", "Fire", "🔥", "rare",
-    "Releases a fiery burst after you deal enough damage.",
-    "City and built-up POIs.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "holofoil", d: "0.53%" }, { v: "cube", d: "0.21%" }, { v: "quack", d: "0%" }]),
-  S("fishy", "Fishy", "🐟", "rare",
-    "Faster swimming, plus a brief speed boost when you take damage.",
-    "Chests across the map.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.64%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "cube", d: "0.21%" }]),
-  S("air", "Air", "🌀", "rare",
-    "Sprint faster, jump higher while sprinting, no fall damage.",
-    "Chests, Rare Chests and Sprite Chests map-wide.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.53%" }, { v: "gummy", d: "0.53%" }, { v: "galaxy", d: "0.43%" }, { v: "holofoil", d: "0.53%" }]),
-  S("duck", "Duck", "🦆", "epic",
-    "Emoting or jamming replenishes your shields.",
-    "Sprite Chests across the map.",
-    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", d: "0.1%" }]),
-  S("ghost", "Ghost", "👻", "epic",
-    "Cloaks you on reload.",
-    "Only spawns at night.",
-    [{ v: "normal", d: "5.25%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "holofoil", d: "1.23%" }]),
-  S("demon", "Demon", "😈", "epic",
-    "Siphons health and shields on eliminations.",
-    "Sprite Chests across the map.",
-    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", d: "0.1%" }]),
-  S("king", "King", "👑", "epic",
-    "Your pickaxe deals more damage.",
-    "Sprite Chests across the map.",
-    [{ v: "normal", d: "5.25%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "holofoil", d: "1.23%" }]),
-  S("aura", "Aura", "✨", "epic",
-    "Grants a Shock Rock charge after you deal enough damage.",
-    "Chests and Supply Drops across the map.",
-    [{ v: "normal", d: "6.48%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "gem", d: "0.08%" }]),
-  S("striker", "Striker", "⚽", "epic",
-    "Triggers Overdrive when you mantle, hurdle or wall scramble.",
-    "Score a goal at the Soccer Pitch.",
-    [{ v: "normal", d: "5.25%" }, { v: "gold", d: "0.62%" }, { v: "gummy", d: "0.37%" }, { v: "galaxy", d: "0.25%" }, { v: "holofoil", d: "1.23%" }]),
-  S("dream", "Dream", "🌙", "legendary",
-    "Grants a random item each level; legendary loot at max level.",
-    "Chests only — a rarer spawn.",
-    [{ v: "normal", d: "4.45%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "cube", d: "0.04%" }]),
-  S("punk", "Punk", "🎸", "legendary",
-    "Chance of infinite ammo.",
-    "Chests only — a rarer spawn.",
-    [{ v: "normal", d: "4.45%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "gem", d: "0%" }, { v: "cube", d: "0.04%" }]),
-  S("boss", "Boss", "💪", "legendary",
-    "Boosts your maximum Health and Shield.",
-    "Drops from any Boss you defeat.",
-    [{ v: "normal", d: "4.45%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "cube", d: "0.04%" }]),
-  S("seven", "Seven", "🛰️", "legendary",
-    "Makes enemy footsteps visible to your whole squad.",
-    "Sprite Chests in unranked BR and Zero Build.",
-    [{ v: "normal", d: "3.63%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "holofoil", d: "0.85%" }]),
-  S("peely", "Peeky Peely", "🍌", "legendary",
-    "Marks rare sprite variants and their carriers nearby — but reveals you too.",
-    "High ground — mountainous areas.",
-    [{ v: "normal", d: "4.62%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "holofoil", d: "0.85%" }]),
-  S("llama", "Lootin' Llama", "🦙", "legendary",
-    "Chance of a weapon upgrade when you open an ammo box.",
-    "Relic Chests; Sprite/Rare Chests at Golden Grove and Calamari Canyon.",
-    [{ v: "normal", d: "4.45%" }, { v: "gold", d: "0.43%" }, { v: "gummy", d: "0.26%" }, { v: "galaxy", d: "0.17%" }, { v: "gem", d: "0%" }]),
-  S("batman", "Batman", "🦇", "mythic",
-    "Bat Cape glide, and better odds of rare Sprites in chests.",
-    "Beat Catwoman / Harley / Poison Ivy NPCs, DC quests, or Sprite Chests.",
-    [{ v: "normal", d: "1.44%" }, { v: "gold", d: "0.17%" }, { v: "gummy", d: "0.1%" }, { v: "galaxy", d: "0.07%" }, { v: "holofoil", d: "0.34%" }, { v: "cube", d: "0.02%" }]),
-  S("grimreaper", "Grim Reaper", "💀", "mythic",
-    "Anyone who attacks you gets marked.",
-    "Chests across the map.",
-    [{ v: "normal", d: "0.15%" }, { v: "gold", d: "0.01%" }, { v: "gummy", d: "0.01%" }, { v: "galaxy", d: "0.01%" }, { v: "gem", d: "0.00099%" }, { v: "holofoil", d: "0%" }, { v: "cube", d: "0%" }]),
-  S("zeropoint", "Zero Point", "🔷", "mythic",
-    "Spawns a Shield Bubble Jr. when you self-heal.",
-    "Vault / keycard Sprite Chests — the rarest spawn.",
-    [{ v: "normal", d: "0%" }, { v: "gold", d: "0.00014%" }, { v: "gummy", d: "0.000085%" }, { v: "galaxy", d: "0.000056%" }, { v: "gem", d: "0.00001%" }, { v: "holofoil", d: "0.00028%" }, { v: "cube", d: "0.000014%" }, { v: "quack", d: "0%" }]),
-  S("burntpeanut", "Burnt Peanut", "🥜", "mythic",
-    "Chance of extra loot on eliminations; mythic loot when maxed.",
-    "Relic Chests (~1.5% chance).",
-    [{ v: "normal", d: "2.14%" }]),
-  S("vinijr", "Vini Jr.", "🇧🇷", "mythic",
-    "Sprint slidekick that damages enemies and boosts fire rate + reload.",
-    "Sprite Chests and Rare Chests.",
-    [{ v: "normal", d: "2.14%" }]),
-  S("pollo", "Pollo", "🐔", "mythic",
-    "Squad regenerates shields after an elimination.",
-    "Sprite Chests and Rare Chests — or trade for it.",
-    [{ v: "normal", d: "2.14%" }]),
-  S("johnwick", "John Wick", "🕴️", "mythic",
-    "Reveals nearby enemies after you knock or eliminate a player.",
-    "The Simpsons Reload map — carries over to Battle Royale.",
-    [{ v: "normal", d: "0%" }]),
-  S("ironmouse", "Ironmouse", "🐭", "mythic",
-    "Regenerates health over time when running low, granting Cloak and low gravity while it does.",
-    "Sprite Chests and Rare Chests across the map.",
-    [{ v: "normal", d: "2.14%" }]),
+  S("bush", "Bush", "🌳", "rare",
+    "Spawns a bush disguise you can hide inside.",
+    "Cheat Code Chests across the map — blue codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("adventure", "Adventure", "🧭", "rare",
+    "Upgrades a random item you're holding each level.",
+    "Cheat Code Chests across the map — blue codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("jonesy", "Jonesy", "😎", "rare",
+    "Heals you after you take damage.",
+    "Cheat Code Chests across the map — blue codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("8bit", "8-Bit", "🎮", "rare",
+    "Places an 8-Bit Shotgun in your first Chest each match, with a score multiplier.",
+    "Cheat Code Chests across the map — blue codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("stormscout", "Storm Scout", "🌩️", "rare",
+    "Ability not yet revealed.",
+    "Not yet available.",
+    [{ v: "normal", d: "0%", u: true }, { v: "gold", d: "0%", u: true }, { v: "cheatmaster", d: "0%", u: true }]),
+  S("sonic", "Sonic", "🦔", "epic",
+    "Sprint faster.",
+    "Cheat Code Chests across the map — purple codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("tails", "Tails", "🦊", "epic",
+    "Lets you hover.",
+    "Cheat Code Chests across the map — purple codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("shadow", "Shadow", "🌑", "epic",
+    "Automatically reloads your weapons over time, including ones you're not holding.",
+    "Cheat Code Chests across the map — purple codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("killswitch", "Killswitch", "🎯", "epic",
+    "Activates Hangtime with improved accuracy.",
+    "Cheat Code Chests across the map — purple codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("jackrabbit", "Jackrabbit", "🐰", "legendary",
+    "Grants an extra mid-air jump.",
+    "Cheat Code Chests across the map — gold codes.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("klombo", "Klombo", "🦖", "mythic",
+    "Grants a random item on level-up, better loot at higher levels. Levels up by using Health or Shield items.",
+    "Cheat Code Chests across the map.",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
+  S("crown", "Crown", "👑", "mythic",
+    "Grants extra Crown Wins after a Victory Royale. Levels up by winning matches.",
+    "Awarded for winning a match (Victory Royale).",
+    [{ v: "normal", d: "0%" }, { v: "gold", d: "0%" }, { v: "cheatmaster", d: "0%" }]),
 ];
 
 const BASE = (import.meta.env && import.meta.env.BASE_URL) || "/";
